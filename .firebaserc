@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "itsmeromian"
+  },
+  "targets": {
+    "itsmeromian": {
+      "hosting": {
+        "dynafiles": [
+          "dynafiles"
+        ]
+      }
+    }
+  }
+}
