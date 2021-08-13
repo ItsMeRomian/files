@@ -1,5 +1,5 @@
 <template>
-  <h1 class="text-6xl text-center font-light p-3" style="color: #D7DAE5">files.dyna.host</h1>
+  <h1 class="text-6xl text-center font-light p-3" style="color: #D7DAE5">📄 files.dyna.host 📄</h1>
   <div class="container mx-auto">
     <div v-if="getUser()">
       <div class="flex flex-col">
