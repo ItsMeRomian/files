@@ -1,73 +1,70 @@
 <template>
-  <h1 class="text-6xl text-center font-light p-3" style="color: #D7DAE5">📄 files.dyna.host 📄</h1>
+  <h1 v-if="getUser()" class="text-6xl text-center font-light p-3" style="color: #D7DAE5">📄 files.dyna.host 📄</h1>
+  <p class="text-2xl text-center font-light p-3" style="color: #D7DAE5">Logged in as {{ getUser().email }}</p>
   <div class="container mx-auto">
-    <div v-if="getUser()">
-      <div class="flex flex-col">
-        <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div class="py-2 align-middle md:inline-block min-w-full sm:px-6 lg:px-8">
-            <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg" v-if="files.length">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider invisible md:visible">Type</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider invisible md:visible">State</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider invisible md:visible">Size</th>
-                    <th scope="col" class="relative px-6 py-3"><span class="sr-only"></span></th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="file in files" :key="file.id" class="hover:bg-gray-100">
-                    <td class="px-6 py-4 whitespace-nowrap cursor-pointer" v-on:click="download(file.name, file.id)">
-                      <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10">
-                          <img class="h-10 w-10" :src="file.img" alt="" />
-                        </div>
-                        <div class="ml-4">
-                          <div class="text-sm font-medium text-gray-900">{{ file.name }}</div>
-                          <div class="text-sm text-gray-500">{{ formatTime(file.updated_at) }}</div>
+    <div class="flex flex-col">
+      <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="py-2 align-middle md:inline-block min-w-full sm:px-6 lg:px-8">
+          <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg" v-if="files.length">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider invisible md:visible">Type</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider invisible md:visible">State</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider invisible md:visible">Size</th>
+                  <th scope="col" class="relative px-6 py-3"><span class="sr-only"></span></th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="file in files" :key="file.id" class="hover:bg-gray-100">
+                  <td class="px-6 py-4 whitespace-nowrap cursor-pointer" v-on:click="download(file.name, file.id)">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-10 w-10">
+                        <img class="h-10 w-10" :src="file.img" alt="" />
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">{{ file.name }}</div>
+                        <div class="text-sm text-gray-500">{{ formatTime(file.updated_at) }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap invisible md:visible">
+                    <div class="text-sm text-gray-900">{{ file.metadata.mimetype }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap invisible md:visible">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      Online
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 invisible md:visible">
+                    {{ formatBytes(file.metadata.size) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium cursor-pointer">
+                    <a href="#" class="text-indigo-600 hover:text-indigo-900" v-if="!file.toBeDeleted" v-on:click="file.toBeDeleted = true">Delete</a>
+                    <a href="#" class="text-indigo-600 hover:text-indigo-900" v-if="file.toBeDeleted" v-on:click="deleteFile(file.name)">?!</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-10 w-10"></div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">
+                          <input type="file" id="file" ref="file" v-on:change="upload()" />
                         </div>
                       </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap invisible md:visible">
-                      <div class="text-sm text-gray-900">{{ file.metadata.mimetype }}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap invisible md:visible">
-                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Online
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 invisible md:visible">
-                      {{ formatBytes(file.metadata.size) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium cursor-pointer" v-on:click="deleteFile(file.name)">
-                      <a href="#" class="text-indigo-600 hover:text-indigo-900" v-if="!file.downloading">Delete</a>
-                      <span class="text-red-900" v-if="file.downloading">Delete</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10">
-                          <!-- <img class="h-10 w-10 rounded-full" :src="file.image" alt="" /> -->
-                        </div>
-                        <div class="ml-4">
-                          <div class="text-sm font-medium text-gray-900">
-                            <input type="file" id="file" ref="file" v-on:change="upload()" />
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td colspan="4"></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div v-else>
-              <h3 style="color: #D7DAE5" class="text-center">
-                I'm sorry, but <b>{{ getUser().email }}</b> has no access to files.dyna.host
-              </h3>
-            </div>
+                    </div>
+                  </td>
+                  <td colspan="4"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else>
+            <h3 style="color: #D7DAE5" class="text-center">
+              I'm sorry, but <b>{{ getUser().email }}</b> has no access to files.dyna.host
+            </h3>
           </div>
         </div>
       </div>
@@ -91,7 +88,7 @@ export default defineComponent({
   },
   data() {
     return {
-      files: new Array<FileObject>()
+      files: new Array<any>()
     };
   },
   methods: {
